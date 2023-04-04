@@ -1,5 +1,6 @@
 from serial.tools import list_ports
 import serial
+import logging
 
 
 class Device:
@@ -98,20 +99,29 @@ class Device:
                 d = Device()
                 d.ser = serial.Serial(p.device)
                 while d.get_type() is False:
-                    print('False')
+                    logging.info('Failed to get type')
                 while d.get_name() is False:
-                    print('False')
-                print(d)
+                    logging.info('Failed to get type')
+                logging.info(str(d))
                 device_list.append(d)
         return device_list
 
 
-devices = Device.get_devices()
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("uart.log"),
+            logging.StreamHandler()
+        ]
+    )
+    devices = Device.get_devices()
 
-for d in devices:
-    if d.type == 'HUM':
-        d.send_command('O,T,1')
-while True:
     for d in devices:
-        print(d.type)
-        print(d.get_reading())
+        if d.type == 'HUM':
+            d.send_command('O,T,1')
+    while True:
+        for d in devices:
+            logging.info(d.type)
+            logging.info(d.get_reading())
