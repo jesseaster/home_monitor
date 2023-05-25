@@ -58,13 +58,18 @@ async def main():
         elif d.type == 'CO2':
             co2_probe = d
     while True:
-        co2 = co2_probe.get_reading()
-        hum, temp = hum_probe.get_reading()
-        now = datetime.datetime.now()
-        sql_insert = "INSERT INTO home_monitor (t_stamp, co2, hum, temp) VALUES ('" + str(now) + "', " + str(co2) + ", " + str(hum) + ", " + str(temp) + ")"
-        logging.info(sql_insert)
-        cur.execute(sql_insert)
-        conn.commit()
+        try:
+            co2 = co2_probe.get_reading()
+            if co2 is None:
+                co2 = "Null"
+            hum, temp = hum_probe.get_reading()
+            now = datetime.datetime.now()
+            sql_insert = "INSERT INTO home_monitor (t_stamp, co2, hum, temp) VALUES ('" + str(now) + "', " + str(co2) + ", " + str(hum) + ", " + str(temp) + ")"
+            logging.info(sql_insert)
+            cur.execute(sql_insert)
+            conn.commit()
+        except (TypeError, psycopg2.errors.UndefinedColumn) as e:
+            logging.error(str(e))
         list_all_rows()
         await asyncio.sleep(300)
     conn.close()

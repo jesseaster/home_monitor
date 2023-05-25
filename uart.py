@@ -83,12 +83,20 @@ class Device:
         str_value = string.split("'")[1]
         str_value = str_value.split('\\')[0]
         if self.type == 'HUM':
-            str_values = str_value.split(',')
-            hum = float(str_values[0])
-            temp = float(str_values[1])
-            value = [hum, temp]
+            try:
+                str_values = str_value.split(',')
+                hum = float(str_values[0])
+                temp = float(str_values[1])
+                value = [hum, temp]
+            except (IndexError, ValueError) as error:
+                logging.error(str(error))
+                return None
         else:
-            value = float(str_value)
+            try:
+                value = float(str_value)
+            except ValueError as error:
+                logging.error(str(error))
+                return None
         return value
 
     def get_devices():
